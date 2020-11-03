@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { has, without } from 'lodash';
+import { has, without, difference, concat } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -15,11 +15,16 @@ import {
 	hasBlockSupport,
 } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
+import { ToolbarGroup } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { BlockControls, BlockAlignmentToolbar } from '../components';
+import {
+	BlockControls,
+	BlockAlignmentToolbar,
+	__experimentalBlockFullHeightAligmentToolbar as FullHeightAlignmentToolbar,
+} from '../components';
 
 /**
  * An array which includes all possible valid alignments,
@@ -28,16 +33,7 @@ import { BlockControls, BlockAlignmentToolbar } from '../components';
  * @constant
  * @type {string[]}
  */
-const ALL_ALIGNMENTS = [
-	'left',
-	'center',
-	'right',
-	'wide',
-	'full',
-	'fullHeight',
-];
-
-const NOT_DEFAULT_ALIGNMENTS = [ 'fullHeight' ];
+const REGULAR_ALIGNMENTS = [ 'left', 'center', 'right', 'wide', 'full' ];
 
 /**
  * An array which includes all wide alignments.
@@ -48,6 +44,16 @@ const NOT_DEFAULT_ALIGNMENTS = [ 'fullHeight' ];
  * @type {string[]}
  */
 const WIDE_ALIGNMENTS = [ 'wide', 'full' ];
+
+const VERTICAL_ALIGNMENTS = [ 'fullHeight' ];
+
+/**
+ * An array which contains all options that won't be
+ * added by default, whn align property is True.
+ */
+const NOT_DEFAULT_ALIGNMENTS = [ 'fullHeight' ];
+
+const ALL_ALIGNMENTS = concat( REGULAR_ALIGNMENTS, VERTICAL_ALIGNMENTS );
 
 /**
  * Returns the valid alignments.
@@ -73,7 +79,7 @@ export function getValidAlignments(
 	} else if ( blockAlign === true ) {
 		// `true` includes all alignments...
 		// except the not-default ones.
-		validAlignments = ALL_ALIGNMENTS.filter(
+		validAlignments = REGULAR_ALIGNMENTS.filter(
 			( value ) => ! NOT_DEFAULT_ALIGNMENTS.includes( value )
 		);
 	} else {
@@ -101,6 +107,7 @@ export function addAttribute( settings ) {
 	if ( has( settings.attributes, [ 'align', 'type' ] ) ) {
 		return settings;
 	}
+
 	if ( hasBlockSupport( settings, 'align' ) ) {
 		// Gracefully handle if settings.attributes is undefined.
 		settings.attributes = {
@@ -109,7 +116,10 @@ export function addAttribute( settings ) {
 				type: 'string',
 				// Allow for '' since it is used by updateAlignment function
 				// in withToolbarControls for special cases with defined default values.
-				enum: [ ...ALL_ALIGNMENTS, '' ],
+				enum: [ ...REGULAR_ALIGNMENTS, '' ],
+			},
+			fullHeightAlign: {
+				type: 'boolean',
 			},
 		};
 	}
@@ -136,6 +146,17 @@ export const withToolbarControls = createHigherOrderComponent(
 			hasBlockSupport( blockName, 'alignWide', true )
 		);
 
+		// Organize aligments by regular and vertical.
+		const regularValidAlignments = difference(
+			validAlignments,
+			VERTICAL_ALIGNMENTS
+		);
+
+		const verticalValidAlignments = difference(
+			validAlignments,
+			REGULAR_ALIGNMENTS
+		);
+
 		const updateAlignment = ( nextAlign ) => {
 			if ( ! nextAlign ) {
 				const blockType = getBlockType( props.name );
@@ -147,14 +168,30 @@ export const withToolbarControls = createHigherOrderComponent(
 			props.setAttributes( { align: nextAlign } );
 		};
 
+		const updateFullHeightAlignment = ( newFullHeightAlign ) => {
+			props.setAttributes( { fullHeightAlign: newFullHeightAlign } );
+		};
+
 		return [
 			validAlignments.length > 0 && props.isSelected && (
 				<BlockControls key="align-controls">
-					<BlockAlignmentToolbar
-						value={ props.attributes.align }
-						onChange={ updateAlignment }
-						controls={ validAlignments }
-					/>
+					<ToolbarGroup>
+						{ !! regularValidAlignments.length && (
+							<BlockAlignmentToolbar
+								value={ props.attributes.align }
+								onChange={ updateAlignment }
+								controls={ regularValidAlignments }
+							/>
+						) }
+
+						{ !! verticalValidAlignments.indexOf( 'fullHeight' ) >=
+							0 && (
+							<FullHeightAlignmentToolbar
+								isActive={ props.attributes.fullHeightAlign }
+								onToggle={ updateFullHeightAlignment }
+							/>
+						) }
+					</ToolbarGroup>
 				</BlockControls>
 			),
 			<BlockEdit key="edit" { ...props } />,
