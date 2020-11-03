@@ -209,7 +209,7 @@ export const withToolbarControls = createHigherOrderComponent(
 export const withDataAlign = createHigherOrderComponent(
 	( BlockListBlock ) => ( props ) => {
 		const { name, attributes } = props;
-		const { align } = attributes;
+		const { align, fullHeightAlign } = attributes;
 		const hasWideEnabled = useSelect(
 			( select ) =>
 				!! select( 'core/block-editor' ).getSettings().alignWide,
@@ -218,7 +218,7 @@ export const withDataAlign = createHigherOrderComponent(
 
 		// If an alignment is not assigned, there's no need to go through the
 		// effort to validate or assign its value.
-		if ( align === undefined ) {
+		if ( align === undefined && ! fullHeightAlign ) {
 			return <BlockListBlock { ...props } />;
 		}
 
@@ -231,6 +231,13 @@ export const withDataAlign = createHigherOrderComponent(
 		let wrapperProps = props.wrapperProps;
 		if ( validAlignments.includes( align ) ) {
 			wrapperProps = { ...wrapperProps, 'data-align': align };
+		}
+
+		if ( fullHeightAlign ) {
+			wrapperProps = {
+				...wrapperProps,
+				'data-full-height-align': true,
+			};
 		}
 
 		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
@@ -247,7 +254,7 @@ export const withDataAlign = createHigherOrderComponent(
  * @return {Object}            Filtered props applied to save element
  */
 export function addAssignedAlign( props, blockType, attributes ) {
-	const { align } = attributes;
+	const { align, fullHeightAlign } = attributes;
 	const blockAlign = getBlockSupport( blockType, 'align' );
 	const hasWideBlockSupport = hasBlockSupport( blockType, 'alignWide', true );
 
@@ -258,9 +265,11 @@ export function addAssignedAlign( props, blockType, attributes ) {
 		blockAlign,
 		hasWideBlockSupport
 	).includes( align );
-	if ( isAlignValid ) {
-		props.className = classnames( `align${ align }`, props.className );
-	}
+
+	props.className = classnames( props.className, {
+		[ `align${ align }` ]: isAlignValid,
+		'is-full-height-align': fullHeightAlign,
+	} );
 
 	return props;
 }
