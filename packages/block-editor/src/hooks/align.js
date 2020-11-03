@@ -37,6 +37,8 @@ const ALL_ALIGNMENTS = [
 	'fullHeight',
 ];
 
+const NOT_DEFAULT_ALIGNMENTS = [ 'fullHeight' ];
+
 /**
  * An array which includes all wide alignments.
  * In order for this alignments to be valid they need to be supported by the block,
@@ -70,7 +72,10 @@ export function getValidAlignments(
 		);
 	} else if ( blockAlign === true ) {
 		// `true` includes all alignments...
-		validAlignments = ALL_ALIGNMENTS;
+		// except the not-default ones.
+		validAlignments = ALL_ALIGNMENTS.filter(
+			( value ) => ! NOT_DEFAULT_ALIGNMENTS.includes( value )
+		);
 	} else {
 		validAlignments = [];
 	}
