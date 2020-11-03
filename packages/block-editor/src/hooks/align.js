@@ -28,7 +28,14 @@ import { BlockControls, BlockAlignmentToolbar } from '../components';
  * @constant
  * @type {string[]}
  */
-const ALL_ALIGNMENTS = [ 'left', 'center', 'right', 'wide', 'full' ];
+const ALL_ALIGNMENTS = [
+	'left',
+	'center',
+	'right',
+	'wide',
+	'full',
+	'fullHeight',
+];
 
 /**
  * An array which includes all wide alignments.

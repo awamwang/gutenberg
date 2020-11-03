@@ -82,8 +82,16 @@ describe( 'align', () => {
 					'center',
 					'wide',
 					'left',
+					'fullHeight',
 				] )
-			).toEqual( [ 'left', 'center', 'right', 'wide', 'full' ] );
+			).toEqual( [
+				'left',
+				'center',
+				'right',
+				'wide',
+				'full',
+				'fullHeight',
+			] );
 		} );
 
 		it( 'should return all aligns if block defines align support as true', () => {

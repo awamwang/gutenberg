@@ -23,7 +23,7 @@ function gutenberg_register_alignment_support( $block_type ) {
 		if ( ! array_key_exists( 'align', $block_type->attributes ) ) {
 			$block_type->attributes['align'] = array(
 				'type' => 'string',
-				'enum' => array( 'left', 'center', 'right', 'wide', 'full', '' ),
+				'enum' => array( 'left', 'center', 'right', 'wide', 'full', 'fullHeight', '' ),
 			);
 		}
 	}
