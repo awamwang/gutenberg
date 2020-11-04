@@ -52,7 +52,7 @@
 	},
 	"supports": {
 		"anchor": true,
-		"align": true,
+		"align": [ "left", "center", "right", "wide", "full", "fullHeight" ],
 		"html": false,
 		"spacing": {
 			"padding": true

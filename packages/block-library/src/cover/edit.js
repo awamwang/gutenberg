@@ -37,7 +37,6 @@ import {
 	__experimentalPanelColorGradientSettings as PanelColorGradientSettings,
 	__experimentalUnitControl as UnitControl,
 	__experimentalBlockAlignmentMatrixToolbar as BlockAlignmentMatrixToolbar,
-	__experimentalBlockFullHeightAligmentToolbar as FullHeightAlignment,
 } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { withDispatch } from '@wordpress/data';
@@ -257,6 +256,7 @@ function CoverEdit( {
 		minHeightUnit,
 		style: styleAttribute,
 		url,
+		fullHeightAlign,
 	} = attributes;
 	const {
 		gradientClass,
@@ -283,8 +283,8 @@ function CoverEdit( {
 		setPrevMinHeightUnit( minHeightUnit );
 	}, [ isMinFullHeight, minHeight, minHeightUnit ] );
 
-	const toggleMinFullHeight = () => {
-		if ( isMinFullHeight ) {
+	useEffect( () => {
+		if ( ! fullHeightAlign ) {
 			// If there aren't previous values, take the default ones.
 			if ( prevMinHeightUnit === 'vh' && prevMinHeightValue === 100 ) {
 				return setAttributes( {
@@ -305,7 +305,7 @@ function CoverEdit( {
 			minHeight: 100,
 			minHeightUnit: 'vh',
 		} );
-	};
+	}, [ fullHeightAlign ] );
 
 	const toggleParallax = () => {
 		setAttributes( {
@@ -366,10 +366,6 @@ function CoverEdit( {
 	const controls = (
 		<>
 			<BlockControls>
-				<FullHeightAlignment
-					isActive={ isMinFullHeight }
-					onToggle={ toggleMinFullHeight }
-				/>
 				{ hasBackground && (
 					<>
 						<BlockAlignmentMatrixToolbar
